@@ -1,0 +1,1081 @@
+\input{settings.tex}
+%\title{ \Large{Notes from Class} \vspace{0.5pc} \\ \textbf{{Random Matrix Theory}}}
+\title{\textbf{Random Matrix Theory Notes}\footnote{Lecture held by Prof. Felix Krahmer in WiSe2223}}
+%\author{Min Tang}
+%\date{27. Oktober 2019}
+\begin{document}
+\maketitle
+\tableofcontents 
+\newpage
+\setcounter{page}{1}
+\section{Introduction}
+\mymarginpar{\tiny{1. Lecture \\ 17.10.2022}}
+\subsection{Why singular values?}
+\begin{itemize}[itemsep=0pt]
+\item Linear equations $y=Ax$ are \emph{simplest possible approximation} for any continuous model.
+\item Taylor's theorem: for small variable range, we can obtain good approximation results under some regularity conditions.
+\item An important aspect here is \emph{stability}:
+\subitem - How do small perturbations in $x$ change $y$? 
+\subitem - Reversely, how do small perturbations in $y$ change the reconstruction quality for $x$?
+\item Suitable measure for the ``quality'' of $A$:
+$$\text{\emph{the condition number}} \quad \frac{s_{\max}}{s_{\min}},$$
+where $s_{\max}$ and $s_{\min}$ are the maximal and minimal singular values of $A$.
+\item When we have the freedom to \emph{design} $A$ (possible via model parameters), we want the condition number to be small. Ideal situation: \emph{approximate isometry}, i.e. all singular values $\approx 1$ (after scaling or normalization).
+\end{itemize}
+\subsection{Why random matrices?}
+\begin{enumerate}[(a),itemsep=0pt]
+\item \emph{Compressed sensing}. \vspace{-0.5pc}
+\begin{itemize}[itemsep=0pt]
+\item For a \emph{square matrix}, identity is perfectly well-conditioned.
+\item For a \emph{flat rectangular matrix} $A \in \R^{m\times N}$, we have a nontrivial kernel. This can be the worst conditioning (no unique solution). \vspace{-0.5pc}
+\end{itemize}
+In signal processing, signals of interest are often modeled as being \emph{approximately sparse}, i.e., most entries are very small, but we don't know where the large entries are. \\
+\emph{Question:} Can we choose $A$ such that all $k$-columns submatrices ($k<m$) are approximate isometries? How many rows do we need? The simplest solution would be $N$ rows (identity), but that's not desirable because we want to minimize the amount of data we need to access. To reduce it, there are some \emph{deterministic} algorithms which roughly require $k^2$ rows. However, random construction would only require $k\log N$ rows.
+\item \emph{Dimension reduction}. Assuming that we have $p$ points $\{x_1,...,x_p\}\in \R^N$, can we project $\R^N \to \R^n$ using a matrix $A$ such that the geometry is approximately preserved
+\begin{equation*}
+(1-\varepsilon) \|x_i-x_j\| \leq \|Ax_i-Ax_j\| \leq (1+\varepsilon) \|x_i-x_j\|.
+\end{equation*}
+\begin{itemize}[itemsep=0pt]
+\item Deterministic method must adapt to the points $\{x_1,...,x_p\}$. No single matrix will work for all sets. (Isometry $\lightning$ Dimension reduction)
+\item Random methods work for every set with high probability, and no adaptation is necessary (just set of failures is different). This is of huge advantage for high-dimensional data processing.
+\end{itemize}
+\end{enumerate}
+\subsection{Asymptotic and non-asymptotic regimes}
+Random matrix theory studies properties of $N\times n$ matrices $A$ chosen from some distribution on the set of all matrices.
+\paragraph{Observation:} $N,n \to \infty \implies $ spectrum of $A$ stabilizes 
+\paragraph{Mathematical formulation:} \emph{Limit laws} (Random matrix version of central limit theorem)
+\begin{example*}[Bai-Yin law]
+Let $A\in \R^{n\times n}$ with i.i.d. standard normal random entries. Then
+\begin{equation*}
+\frac{s_{\max}(A)}{2\sqrt{n}} \overset{n\to\infty}{\longrightarrow} 1 \quad \text{a.s.}
+\end{equation*}
+\end{example*}
+This is not enough for finite dimensions, because we have no information about the rate. We need a non-asymptotic version: In every dimension, one has
+\begin{equation*}
+s_{\max} (A) \leq C\sqrt{n} \quad \text{w.p. at least } 1-C'\exp(-n)
+\end{equation*}
+for absolute constants $C,C'$. Although this version is less precise (due to the absolute constant $C$),  it is more quantitative, i.e. we have exponentially small probability of failure for fixed dimension.
+\subsection{Guiding paradigm}
+$$
+\boxed{\text{Tall random matrices should act as approximate isometries.}}
+$$
+More precisely, an $N\times n$ random matrix $A$ with $N\gg n$ should satisfy
+\begin{equation*}
+(1-\delta) k\|x\|_2 \leq \|Ax\|_2 \leq (1+\delta) k\|x\|_2 \quad \text{with high probability}
+\end{equation*}
+with $k$ a normalization factor and $\delta \ll 1$. Equivalently,
+\begin{equation*}
+(1-\delta) k \leq s_{\min}(A) \leq s_{\max}(A) \leq (1+\delta)K
+\end{equation*}
+yet equivalently
+\begin{equation*}
+\text{condition number} \quad \frac{s_{\max}(A)}{s_{\min}(A)} \leq \frac{1+\delta}{1-\delta}\approx 1.
+\end{equation*}
+\subsection{In this class}
+We study (tall) random matrices with \emph{independent rows} or \emph{independent columns} and either \emph{strong moment assumptions} (\textbf{Subgaussian}) or \emph{no moment assumption} except finite variance (\textbf{heavy-tailed}). 
+\paragraph{Applications:} \vspace{1pc}
+\begin{itemize}[itemsep=0pt]
+	\item (Compressed sensing)
+	\item Dimension reduction  
+	\item Estimation of covariance matrices
+\end{itemize}
+	
+\section{Preliminaries}
+\subsection{Matrices and their singular values}
+We mostly study tall $A\in \R^{N\times n}$ or $\mathbb{C}^{N\times n}$ with $ N \geq 1 n >1$ (for flat matrices, consider adjoint).
+\begin{definition}[Singular values]
+\begin{mdframed}
+The numbers
+\begin{equation*}
+s_1(A) \geq s_2(A) \geq \cdots \geq s_n(A) \geq 0
+\end{equation*}
+such that $s_i^2(A)$ are the eigenvalues of $A^*A$ are called the \emph{singular values} of $A$. We also write for the extreme singular values 
+\begin{equation*}
+s_{\max}(A) := s_1(A), \quad s_{\min}(A) := s_n(A).
+\end{equation*}
+\end{mdframed}
+\end{definition}
+\textbf{Observations:}\vspace{-0.5pc}
+\begin{itemize}[itemsep=0pt]
+	\item $s_{\max}(A)$ and $s_{\min}(A)$ are the smallest $M\in\R$ and the largest $m\in \R$ s.t.
+	\begin{equation*}
+		m\|x\|_2 \leq \|Ax\|_2 \leq M\|x\|_2 \quad \forall x\in\R^n.
+	\end{equation*}
+	\item For flat matrices $A$, $s_{\min}(A)$ is 0.
+	\item Geometric interpretation: Extreme singular values control the distortion of the Euclidian geometry under the action of $A$.
+\end{itemize}
+\begin{definition}[Spectral norm]
+\begin{mdframed}
+We define the \emph{spectral norm} (or \emph{operator norm})
+\begin{equation*}
+\|A\| = \|A\|_{l_2^n\to l_2^N} = \sup_{x\in \R^n\setminus \{0\}} \frac{\|Ax\|_2}{\|x\|_2} = \sup_{x\in \mathbb{S}^{n-1}}\|Ax\|_2.
+\end{equation*}
+\end{mdframed}
+Then it holds that $s_{\max}(A) = \|A\|$ and $s_{\min} =  \frac{1}{\|A^{\dagger}\|}$, where $A^{\dagger}$ is the pseudo-inverse of $A$. Further note that
+\begin{equation*}
+\|A\| = \underbrace{\|s\|_\infty}_{\max_{i} |s_i| = |s_1|} \quad \text{where } s=(s_1,...,s_n).
+\end{equation*}
+\end{definition}
+Similarly, we define
+\begin{definition}[Schatten norm]
+\begin{mdframed}
+Let $A\in \R^{N \times n}$ or $\mathbb{C}^{N\times n}$ with singular values $(s_1,...,s_n)=:S$. Let $1 \leq p \leq \infty$. Then the Schatten-$p$-norm is defined as 
+\begin{equation*}
+\|A\|_{S^p} := \|s\|_p.
+\end{equation*}
+The Schatten-2-norm is also called the Frobenius norm and denoted by $\|\cdot\|_F$.
+\end{mdframed}
+\end{definition}
+
+\subsection{Nets}
+Recall that $s_{\max}(A) = \|A\| = \sup_{x\in\mathbb{S}^{n-1}} \|Ax\|_2$ is a supremum over infinitely many $x$. To analyze the distribution of $s_{\max}$ for a random matrix $A$, we need to discretize this expression.
+\begin{definition}[$\varepsilon$-net, covering number]
+\begin{mdframed}
+Let $(X,d)$ be a metric space and let $\varepsilon>0$. A subset $N_\varepsilon$ is called an \emph{$\varepsilon$-net} of $X$ if every point $x\in X$ can be approximated to an accuracy of $\varepsilon$ by some point $y\in N_\varepsilon$, i.e., s.t. $d(x,y)\leq \varepsilon$. \\
+The minimal cardinality of an $\varepsilon$-net of $X$, if finite, is denoted $N(X,\varepsilon)$ and is called the \emph{covering number} of $X$ at scale $\varepsilon$.
+\end{mdframed}
+\end{definition}
+Note that $N(X,\varepsilon)$ is finite if and only if $X$ is compact.
+\mymarginpar{\tiny{2. Lecture \\ 24.10.2022}}
+\begin{lemma}[Covering number of the sphere]
+\begin{mdframed}
+Consider the vector space $\R^n$  \\ equipped with the norm $\vvvert \cdot \vvvert$ and $S= \{x\in\R^n: \vvvert x \vvvert = 1\}$ to be the associated unit sphere. Then for every $\varepsilon >0$, one has
+\begin{equation*}
+N(s,\varepsilon) \leq \left( 1+\frac{2}{\varepsilon}\right)^n
+\end{equation*}
+\end{mdframed}
+\begin{proof}
+We use a volume argument. Fix $\varepsilon >0$ and choose $N_\varepsilon$ to be a maximal $\varepsilon$-separated subset of $S$, i.e., $N_\varepsilon$ is such that $\vvvert x-y \vvvert \geq \varepsilon$ for all $x,y \in N_\varepsilon$, $x\neq y$, and no superset of $S$ containing $N_\varepsilon$ has this property. This can be constructed by iteratively adding points. At the end, no additional points can be added. As a  result, every point in $S$ has distance $< \varepsilon$ to the nearest point in $N_\varepsilon$. Therefore, $N_\varepsilon$ is an $\varepsilon$-net. \\
+\textbf{Claim:} Balls of radii $\frac{\varepsilon}{2}$ centered at the points in $N_\varepsilon$ are disjoint. Indeed, if two balls overlap, then the distance of the centers is $< \varepsilon$ \Lightning.\\
+All such balls lie in $(1+\frac{\varepsilon}{2})B$, where
+\begin{equation*}
+B= \{x \in \R^n : \vvvert x \vvvert <1
+\}
+\end{equation*}
+We now compare the volumens: because $|N_\varepsilon|$ balls of radius $\frac{\varepsilon}{2}$ are contained in one ball of radius $1+\frac{\varepsilon}{2}$, we have
+\begin{equation*}
+|N_\varepsilon| \vol \left(\frac{\varepsilon}{2}B\right ) \leq \vol \left(\left( 1+ \frac{\varepsilon}{2} \right)B\right).
+\end{equation*}
+Using $\vol(rB) = r^n \vol(B)$, we get
+\begin{equation*}
+|N_\varepsilon| \cdot \left( \frac{\varepsilon}{2} \right)^n \vol(B) \leq \left(1+\frac{\varepsilon}{2} \right)^n \vol(B),
+\end{equation*}
+and therefore 
+\begin{equation*}
+|N_\varepsilon| \leq \left( 1+\frac{2}{\varepsilon} \right)^n.
+\end{equation*}
+\end{proof}
+\end{lemma}
+Nets can help to estimate spectral norms. Remember that spectral norms are defined as a supremum over an infinite set of points. How can we be sure we don't miss the maximizer?\\
+ \textbf{Idea:} Estimate action of $A$ on all points in $N_\varepsilon$ and generalize to all points on the sphere via a perturbation argument.
+\begin{lemma}
+\begin{mdframed}
+Let $A$ be a $N\times n$ matrix and let $N_\varepsilon$ be an $\varepsilon$-net of $S^{n-1}$ w.r.t. the $l_2$-norm for some $\varepsilon \in [0,1)$. Then
+%\begin{equation*}
+$$\max_{x\in N_\varepsilon} \|Ax\|_2 \leq \|A\| \leq (1-\varepsilon)^{-1} \max_{x\in N_\varepsilon} \|Ax\|_2.$$
+%\end{equation*}
+\end{mdframed}
+\begin{proof}
+First note that lower bound follows from the definition. \\
+\underline{Upper bound:} By compactness, there exists $x_0 \in S^{n-1}$ s.t. $\|Ax_0\|_2 = \|A\|$. Choose $y\in N_\varepsilon$ which approximates $x_0$ as $\|x_0-y\|_2 \leq \varepsilon$. By the triangle inequality, we have
+\begin{equation*}
+\begin{split}
+\|A\|= \|Ax_0\|_2 \leq & \|Ay\|_2 + \|A(x_0-y)\| 	\\
+\leq  & \max_{x\in N_\varepsilon} \|Ax\|_2 + \|A\| \cdot \underbrace{\|x_0-y\|_2}_{\leq \varepsilon}
+\end{split}
+\end{equation*}
+Consequently, we have
+\begin{equation*}
+\|A\|(1-\varepsilon) \leq \max_{x\in N_\varepsilon} \|Ax\|
+\end{equation*}
+and thereby the claim.
+\end{proof}
+\end{lemma}
+The same trick works for symmetric matrices and the associated quadratic form. First note that for a symmetric matrix $A\in \operatorname{Sym}(n)$, there exists $Q \in O(n)$ with $A= Q\Sigma Q^T$. Therefore,
+$$
+\sup_{\|x\|_2 =1} \langle Ax, x\rangle \overset{Q^T \in O(n)}= %\sup_{\|x\|_2=1} \langle Ax, Q^T x\rangle = 
+\sup_{\|x\|_2=1} \langle Q\Sigma Q^Tx, Q^T x\rangle = \sup_{\|Q^Tx\|_2=1} \langle \Sigma x, x\rangle = \max_{i} |\Sigma_{ii}| = \|A\|.
+$$
+\begin{lemma}
+\begin{mdframed}
+Let $A$ be a symmetric $n\times n$ matrix and let $N_\varepsilon$ be an $\varepsilon$-net of $S^{n-1}$ w.r.t. $\|\cdot \|_{l_2}$  for some $\varepsilon \in [0,1)$. Then
+\begin{equation*}
+\|A\| = \sup_{x \in S^{n-1}} |\langle Ax, x \rangle | \leq (1-2\varepsilon)^{-1} \max_{x\in N_\varepsilon} |\langle Ax,x \rangle|
+\end{equation*}
+\end{mdframed}
+\begin{proof}
+Choose $x_0 \in S^{n-1}$ s.t. $\|A\|= \langle Ax_0,x_0\rangle$ and choose $y\in N_\varepsilon$ which approximates $x_0$ as $\|x_0 - y \|_2 \leq \varepsilon$. By the triangle inequality, we have
+\begin{equation*}
+\begin{split}
+|\langle Ax_0,x_0 \rangle - \langle Ay,y \rangle| =\  & |\langle Ax_0, x_0-y\rangle + \langle A(x_0-y),y\rangle | \\
+\leq  \ & (\|A\| \|x_0\|_2)\|x_0-y\|_2 + (\|A\| \|x_0-y\|_2)\|y\|_2 \\
+\leq \ & 2\varepsilon \|A\|.
+\end{split}
+\end{equation*}
+Therefore,
+\begin{equation*}
+|\langle Ay,y \rangle | \geq |\langle A x_0, x_0 \rangle | - 2 \varepsilon \|A\| = (1-2\varepsilon) \|A\|.
+\end{equation*}
+The claim follows by taking maximum over $y$.
+\end{proof}
+\end{lemma}
+\subsection{Non-asymptotic results in one dimension}
+Last time, we talked about asymptotic vs. non-asymptotic theory. Most results in probability theory are asymptotic. Here we introduce some non-asymptotic variants.
+\begin{prop}[Hoeffding's inequality]
+\begin{mdframed}
+Let $X_1,...,X_n$ be a sequence of independent, real-valued random variables s.t. $\E(X_l) =0$ and $|X_l| \leq B_l$ a.s. for all $l=1,...,n$ for some $B_l >0$. Then  \vspace{-0.3pc}
+\begin{equation*}
+P\left( 
+\sum_{l=1}^n X_l > t \right) \leq \exp \left( 
+- \frac{t^2}{2\sum_{l=1}^n B_l^2}
+\right) \quad \forall t>0, \vspace{-0.3pc}
+\end{equation*}
+and consequently \vspace{-0.3pc}
+\begin{equation*}
+P\left( \left|
+\sum_{l=1}^n X_l \right| > t  \right) \leq  2\exp \left( 
+- \frac{t^2}{2\sum_{l=1}^n B_l^2}
+\right) \quad \forall t>0. 
+\end{equation*} 
+\end{mdframed}
+\end{prop}
+
+\begin{prop}[Bernstein type inequality]
+\begin{mdframed}
+Let $X_1,...,X_n$ be independent mean-zero random variables such that for all $l\in [n]$\vspace{-0.3pc}
+\begin{equation*}
+\E[|x_l|^m] \leq m! K^{m-2} \frac{\sigma_l}{2}	\quad \forall m\in\N,m\geq 2\vspace{-0.3pc}
+\end{equation*}
+for some $K>0$ and $\sigma_l>0$. Then
+\begin{equation*}
+P\left(\left|
+\sum_{l=1}^n X_l
+\right| > t \right) \leq 2 \exp \left( 
+- \frac{t^2}{2(\sigma^2+Kt)}
+\right)	\quad \forall t>0
+\end{equation*}
+where $\sigma^2 := \sum_{l=1}^n \sigma_l^2$.
+\end{mdframed}
+\end{prop}
+Both results are about sums of independent random variables. Now, we demonstrate one example for sum of \emph{dependent} random variables. One of the simplest dependence could be the product of two independent random variables. \vspace{0.5pc}\\
+\textbf{Chaos:} Consider $X= \sum a_{ij} X_iX_j$ where $a_{ij}$ are deterministic coefficients and $X_i$ are i.i.d. random variables. There will be necessarily dependencies as we have more than $\binom{n}{2}$ choices but we only have $n$ variables. Even more specific: consider \textbf{Rademacher} random variables $\varepsilon_i$ with $P(\varepsilon_i =1) = P(\varepsilon_i = -1) = \frac{1}{2}$ and \textbf{Rademacher chaos}
+$\sum_{i\neq j} a_{ij}\varepsilon_i \varepsilon_j.$
+Note that the diagonal terms are deterministic. \vspace{0.5pc}\\
+However, one problem we face is that $\varepsilon_i$ and $\varepsilon_j$ are the ``same'' variables, and can not be treated separately. We would like to decouple them and compare to the case where $\varepsilon_i$ and $\varepsilon_j'$ are independent sequences. 
+\begin{lemma}[Decoupling] \label{lemma:decoupling}
+\begin{mdframed}
+Let $\xi = (\xi_1,...,\xi_M)$ be a sequence of independent random variables with $\E [\xi_j] =0 \ \forall j\in [M]$. Let $A_{jk}$, $j,k\in [M]$ be a doubly indexed sequence of elements in a vector space $X$. Let $F:X\to \R$ be a convex function. Then
+\begin{equation*}
+\E\left[ F \left(
+\sum_{j,k=1,j\neq k}^M \xi_j \xi_k A_{jk} \right)
+\right] \leq \E \left[
+F \left(
+4 \sum_{j,k=1}^M \xi_j \xi_k' A_{jk}
+\right)\right],
+\end{equation*}
+where $\xi_j'$ is an independent copy of $\xi_j$.
+\end{mdframed}
+\end{lemma}
+\mymarginpar{\tiny{3. Lecture \\ 31.10.2022}}
+\underline{Motivation:} Condition on $\xi'$, use concentration inequality for $\xi$.
+\begin{proof}
+We introduce a sequence $\delta = (\delta_j)_{j=1}^M$ of independent random variables $\delta_j$ via $P(\delta_j =0) =P(\delta_j=1)=\frac{1}{2}$. Then for $j \neq k$
+$$
+\E [\delta_k(1-\delta_j)] = \frac{1}{4}.
+$$
+This yields
+\begin{equation*}
+\begin{split}
+E:= \ &
+\E \left[ F\left(
+\sum_{j\neq k}^M \xi_j \xi_k A_{jk}
+\right)  \right] \\
+= \ &
+\E \left[ F\left( 4 
+\sum_{j\neq k}^M \E_\delta [\delta_j(1-\delta_k)] \xi_j \xi_k A_{jk}
+\right)  \right] \\
+\overset{\text{Jenson}}{\leq} & 
+\E_\xi \left[\E_\delta\left[
+F\left(4
+\sum_{j\neq k}^M
+\delta_j(1-\delta_k)\xi_j\xi_kA_{jk}
+\right) %\, \bigg| \, \xi
+\right] 
+\right].
+\end{split}
+\end{equation*}
+Now let
+$$\sigma(\delta) := \{ j=1,...M: \delta_j =1 \}.$$
+Then by Fubini, we have
+$$E\leq \E_{\delta}\Bigg[ \E_\xi\left[
+F\left( 4
+\sum_{j\in \sigma(\delta)} \sum_{k\notin \sigma(\delta)}
+\xi_j\xi_kA_{jk}
+\right) %\bigg| \, \delta
+\right] 
+\Bigg].
+$$
+Now, conditionally on $\delta$, a random variable $\xi_i$ appears \underline{either} only as the first factor (if $i \in \sigma(s)$) \underline{or} only as the second factor (if $i \notin \sigma(s)$). So if we replace all $\xi_k$, $k\notin \sigma(\delta)$ by independently identically distributed $\xi_k'$, the first factor is never changed, the second factor is always changed and the value of the expectation is not changed. Hence we can write
+\begin{equation*}
+E\leq \E_\delta \left[ \E_\xi \left[\E_{\xi'}
+\left[
+F\left(
+4 \sum_{j\in\sigma(\delta)} \sum_{k \notin \sigma(\delta)} \xi_j \xi_k' A_{jk}
+\right)
+\right]
+\right] \right].
+\end{equation*}
+Hence, there exists $\delta_0$ and $\sigma =\delta(\delta_0)$ s.t. 
+\begin{equation*}
+E\leq  \underbrace{ \E_\xi \left[\E_{\xi'}
+\left[
+F\left(
+4 \sum_{j\in\sigma(\delta_0)} \sum_{k \notin \sigma(\delta_0)} \xi_j \xi_k' A_{jk}
+\right)
+\right]
+\right]}_{(*)}.
+\end{equation*}
+(Otherwise, $E$ can not be smaller than the expectation of $\delta$.) Our \underline{goal} now is to introduce missing terms. We want to use the fact $\E \xi_i =0$ and pull our expectation using Jensen.
+\begin{equation*}
+\begin{split}
+(*) = \ &
+\E_{\xi} \left[
+\E_{\xi'} \left[
+F\left(
+4\sum_{j\in \sigma} \left(
+\sum_{k\notin \sigma} \xi_j \xi_k' A_{jk}+ \sum_{k\in \sigma} \xi_j \underbrace{\E\xi'_k}_{=0} A_{jk}
+\right)
+%+ 4 \sum_{j \notin \sigma} 
+\right)
+\right]
+\right] \\
+\overset{\text{Jenson}}\leq \ &
+\E_\xi \left[
+\E_{\xi'} \left[
+F \left(
+4\sum_{j\in \sigma} \sum_{k=1}^M \xi_j \xi_k' A_{jk}
+\right)
+\right]
+\right] \\
+\overset{\text{Fubini}}= \  &
+\E_{\xi'} \left[\E_\xi \left[
+F\left(
+4\sum_{k=1}^M \left(
+\sum_{j\in \sigma} \xi_j \xi_k' A_{jk} + \sum_{j \notin \sigma}\underbrace{(\E \xi_j)}_{=0}\xi_k'A_{jk}
+\right)
+\right)
+\right] \right] \\
+\overset{\text{Jenson}}\leq \ & \E \left[F\left(
+4 \sum_{j=1}^M \sum_{k=1}^M \xi_j \xi_k' A_{jk}
+\right)\right]
+\end{split}
+\end{equation*}
+and thereby the claim.
+\end{proof}
+\begin{theorem}[Tail estimates for Rademacher chaos]
+\begin{mdframed}
+Let $A \in \R^{M\times M}$ be a symmetric matrix with zero diagonal and $\varepsilon$ a Rademacher factor. Consider the\\ Rademacher chaos 
+\begin{equation*}
+X = \sum_{j,k=1}^M \varepsilon_j \varepsilon_k A_{jk}.
+\end{equation*}
+Then
+\begin{equation*}
+P(|X|\geq t) \leq \begin{cases}
+2 \exp \left(-
+\frac{3t^2}{128\|A\|_F^2}
+\right) \quad &\text{if}\ \  0<t\leq \frac{4\|A\|_F^2}{3\|A\|}\\
+2\exp \left(
+- \frac{t}{32\|A\|}
+\right) \quad & \text{if}\ \   t > \frac{4\|A\|_F^2}{3\|A\|}
+\end{cases}.
+\end{equation*}
+\end{mdframed}
+\begin{proof}
+Consider \underline{moment generating function}
+\begin{equation*}
+\begin{split}
+\E [\exp (\theta x)] =\  & \E \left[ \theta \sum_{j\neq k} \varepsilon_j \varepsilon_k A_{jk} \right] \\
+\overset{\text{Lem. } \ref{lemma:decoupling}}{\leq} \ & \E \left[
+\exp \left(
+4 \theta \sum_{j\neq k}\varepsilon_j \varepsilon'_k A_{jk}
+\right)
+\right]  \\
+= \ &
+\E_\varepsilon \Bigg[ \underbrace{\E_{\varepsilon'}\left[
+\exp  \left( 4\theta \sum_{j\neq k}\varepsilon_j \varepsilon'_k A_{jk} \right) 
+\right]}_{= \prod_{k=1}^M \E \exp \left( 
+\varepsilon_k \cdot 4 \cdot  \theta \sum_{j \neq k} \varepsilon_j A_{jk}
+\right)}
+\Bigg] \\
+\overset{(*)}\leq \ &
+E_\varepsilon \left[
+\prod_k\exp\left(
+8\theta^2 \left| \sum_{j}\varepsilon_j A_{jk} \right|^2
+\right)
+\right]\\
+=\ & E_\varepsilon \left[
+\exp\left(
+8\theta^2 \sum_k \left| \sum_{j}\varepsilon_j A_{jk} \right|^2
+\right)
+\right]
+\end{split}
+\end{equation*}
+where $(*)$ results from 
+$$
+\E (\exp(\theta y)) \leq \exp \left( 
+\frac{\theta^2 y^2_{\max}}{2}
+\right)
+$$
+when $y\leq y_{\max}$ a.s. and $E[y]=0$ with $y_{\max}=4\theta \left| \sum_{j\neq k} \varepsilon_j A_{jk} \right|$. \\
+By symmetry of $A$,
+\begin{equation*}
+\sum_k \left( \sum_j \varepsilon_j A_{jk}\right)^2 = \sum_k  \sum_j \varepsilon_j A_{jk} \sum_l \varepsilon_l A_{lk}  =\varepsilon^* A^2 \varepsilon.
+\end{equation*}
+The matrix $B:=A^2=A^*A$ is symmetric and positive semidefinite. \\
+\underline{Goal:} Estimate moment generating function for positive semi-definite chaos: for $\kappa >0$
+\begin{equation*}
+\begin{split}
+\E [\exp (\kappa \varepsilon^* B \varepsilon)] =\  &  \E \exp\left( 
+\kappa\sum_jB_{jj}+\kappa\sum_{j\neq k}B_{jk}\varepsilon_j\varepsilon_k
+\right)		\\
+\overset{\text{decoupling}}\leq \  &
+\exp(\kappa\operatorname{tr}(B)) \E \left[\exp\left(4\kappa\sum_{j\neq k}B_{jk}\varepsilon_j \varepsilon_k'\right)\right] \\
+\leq \ & \exp(\kappa\operatorname{tr}(B))\E \exp \left(
+8\kappa^2 \sum_k \left( 
+\sum_j \varepsilon_jB_{jk}
+\right)^2
+\right).
+\end{split}
+\end{equation*}
+Now use positive semidefiniteness
+\begin{equation*}
+\sum_k \left(\sum_j
+\varepsilon_j B_{jk} 
+ \right)^2 = \varepsilon^* B^2 \varepsilon = \varepsilon^* PD^2P^*\varepsilon = \sum_i \lambda_i(B) ((P^*\varepsilon)_i)^2 \overset{\lambda_i \geq 0}\leq \lambda_{\max} \varepsilon^*PDP\varepsilon = \|B\|\varepsilon^* B\varepsilon.
+\end{equation*}
+Hence
+\begin{equation*}
+\begin{split}
+\E [\exp(\kappa\varepsilon^* B \varepsilon)]
+\leq  &
+ \exp(\kappa\operatorname{tr}(B))\E [\exp\left(
+8\kappa^2 \|B\|\varepsilon^* B \varepsilon
+\right)] \\
+= &
+\exp(\kappa\operatorname{tr}(B)) \E \left[ 
+(\exp(\varepsilon^*B\varepsilon))^{8\kappa^2\|B\|}
+\right] \\
+\underset{\text{if } 
+8\kappa^2\|B\|< 1} {\overset{\text{
+Jenson}}{\leq}}  & \exp (\kappa\operatorname{tr} (B)) (\E[\exp(\kappa\varepsilon^*B\varepsilon)])^{8k\|B\|}.
+\end{split}
+\end{equation*}
+Consequently
+\begin{equation*}
+\E \exp(\kappa\varepsilon^* B\varepsilon) \leq \exp \left(
+\frac{\kappa\operatorname{tr}(B)}{1-8\kappa\|B\|}
+ \right) 
+\end{equation*}
+provided $0<\kappa< \frac{1}{8\|B\|}$.
+\mymarginpar{\tiny{4. Lecture \\ 7.11.2022}}
+Specify $\theta := \sqrt{\frac{\kappa}{8}}$, i.e. $\kappa = 8\theta^2$. Then
+\begin{equation*}
+\begin{split}
+\E [\exp(\theta X) ] \leq & \exp\left( \frac{8\theta^2 \tr(A^2) }{1-64\theta^2 \|A^2\|} \right),	\quad 0<\theta< \frac{1}{8\sqrt{\|A^2\|}} \\
+\underset{\|A^2\|=\|A\|^2}{\overset{\tr(A^2)=\|A\|_F^2}{=}} & 
+\exp \left(
+\frac{8\theta^2\|A\|_F^2}{1-64\theta^2\|A\|^2}
+\right), \quad 0<\theta<\frac{1}{8\|A\|}
+\end{split}
+\end{equation*}
+by using the fact
+$$
+\|A^2\|=\sup_{x\in S^{n-1}}\langle x,A^2 x\rangle \overset{A\text{ sym.}}{=} \sup_{x\in S^{n-1}} \langle Ax,Ax\rangle = \sup_{x\in S^{n-1}} \|Ax\|^2 = \|A\|^2
+$$
+and
+$$
+\tr(A^2) = \sum_{i,j} A_{ij} A_{ji} = \sum_{ij} A_{ij}^2 = \|A\|_F.
+$$
+Now assume $0<\theta<\frac{1}{16\|A\|}$. Then the denominator $\geq 1- \frac{1}{4} = \frac{3}{4}$. Thus,
+\begin{equation*}
+\begin{split}
+P(X\geq t ) = \  & P (\exp(\theta X) \geq \exp (\theta t)) \overset{\text{Mkv}}\leq \exp(-\theta t) \E[\exp(\theta X)]	\\
+ = \ &  
+ \exp \left(
+ -\theta t+\frac{8\theta^2 \|A\|_F^2}{1-64\theta^2\|A\|^2}
+ \right)\\
+ \leq \ & \exp\left(
+ -\theta t+ \frac{32}{3}\theta^2\|A\|_F^2
+ \right)
+\end{split}
+\end{equation*}
+We now calculator the optimal choice of $\theta$:
+\begin{equation*}
+\begin{split}
+\frac{d}{d\theta}\left(-\theta t + \frac{32}{3}\theta^2 \|A\|_F^2\right) \overset{!}=0\\
+\theta_{\text{opt}} = \frac{3t}{64\|A\|_F^2}
+\end{split}
+\end{equation*}
+Then
+\begin{equation*}
+P(X\geq t) \leq \exp\left(
+- \frac{3t^2}{128\|A\|_F^2}
+\right).
+\end{equation*}
+Recall that we need $0<\theta \leq \frac{1}{16\|A\|}$, i.e. estimate only works for $t \leq \frac{4\|A\|_F^2}{3\|A\|}$. For $t > \frac{4\|A\|_F^2}{3\|A\|}$, set $\theta=\frac{1}{16\|A\|}$ (as large as possible). Then
+\begin{equation*}
+\begin{split}
+P(X\geq t) \leq \ & \exp\left(
+-\theta t + \frac{32 \theta^2 \|A\|_F^2}{3}
+\right) \\
+\underset{\text{otherwise case 1}}{\overset{\theta\leq\theta_{opt}}{\leq}} \  &
+\exp \left(
+-\theta t + \frac{\theta t}{2} 
+\right)
+= \exp\left(-\frac{t}{32\|A\|}\right)
+\end{split}
+\end{equation*}
+Observation: $-X = \sum \varepsilon_i \varepsilon_j A_{ij}$, so by the same proof, we get $$P(-X \geq t) \leq \begin{cases}
+\exp	\left( - \frac{3t^2}{128\|-A\|_F^2} \right), \quad & t\leq  \frac{4\|-A\|_F^2}{3\|-A\|}  \\
+\exp\left(	- \frac{t}{32\|-A\|}		\right),\quad &t > \frac{4\|-A\|_F^2}{3\|-A\|}.
+\end{cases}$$
+And since $\|A\|=\|-A\|$ and $\|A\|_F = \|-A\|_F$, we get
+\begin{equation*}
+P(|X|\geq t) \leq 
+P(X\geq t) + P(X \leq -t)=
+\begin{cases}
+2 \exp \left(-
+\frac{3t^2}{128\|A\|_F^2}
+\right) \quad &\text{if}\ \  0<t\leq \frac{4\|A\|_F^2}{3\|A\|}\\
+2\exp \left(
+- \frac{t}{32\|A\|}
+\right) \quad & \text{if}\ \   t > \frac{4\|A\|_F^2}{3\|A\|}.
+\end{cases}
+\end{equation*}
+and thereby the claim.
+\end{proof}
+\end{theorem}
+\subsection{Subgaussian random variables}
+\underline{Motivation:} Gaussian distributions are well behaved. What do we mean by that? \\
+\underline{Recall:} Let $X$ be a  standard normal random variable. Then the distribution of $X$ has density
+\begin{equation*}
+\frac{1}{\sqrt{2\pi}}\exp\left(-\frac{x^2}{2}\right),
+\end{equation*}
+denoted by $\mathcal{N}(0,1)$. For a normal distribution with mean $\mu$ and variance $\sigma^2$, we have density
+$$
+\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2\right).
+$$
+Properties of the standard normal distribution:
+\begin{itemize}[itemsep=0pc]
+\item Well-behaved tails:
+$$P(|X|>t) \leq 2\exp\left(
+-\frac{t^2}{2}
+\right),\quad t\geq 1$$
+\item Well-behaved moments:
+$$
+(\E |X|^p)^{\frac{1}{p}} = O (\sqrt{p}),\quad p\geq 1
+$$
+\item Well-behaved moment-generating function:
+$$
+\E[\exp(tX)]=\exp\left(\frac{t^2}{2}\right)
+$$
+\end{itemize}
+These three properties shall serve as our idea of a well-behaved distribution. A random variable (or more approximately, the associated distribution) satisfying them will be called \underline{subgaussian}. We will see that the three properties are equivalent. \\
+\underline{Fact} (cf. Stiring's approximation)\footnote{
+Or proof by induction:
+$$p! = p(p-1)! \geq p \frac{(p-1)^{p-1}}{e^{p-1}} = p^p \frac{\left(1-\frac{1}{p}\right)^{p-1}}{e^{p-1}} \overset{(*)}\geq \frac{p^n}{e^p},$$
+where $(*)$ follows from
+\begin{equation*}
+\ln \left(1-\frac{1}{p}\right)^{p-1} = (p-1)\ln \left(
+\frac{p-1}{p}
+\right) = - (p-1) \ln\left(\frac{p}{p-1}\right) = - (p-1) \ln\left(1+\frac{1}{p-1}\right) \overset{(*')}\geq -1 \geq e^{-1},
+\end{equation*}
+and $(*')$ from the fact $\ln(1+x)<x$.
+}:
+$$
+p! \geq \left(
+\frac{p}{e}
+ \right)^p
+$$
+\vspace{-1pc}
+\begin{lemma}[Equivalence of subgaussian properties]\label{lemma:subgaussian}
+\begin{mdframed}
+Let $X$ be a random variable. Then the following properties are equivalent with parameters $k_i >0$ differing from each other by at most an absolute constant factor. More precisely, there exists an absolute constant $C$, s.t. property $i$ implies property $j$ with parameter $k_j \leq C k_i$ for any two properties $i,j=1,2,3$.
+\begin{enumerate}
+\item[(1)] Tails:
+$$P(|X|>t) \leq \exp \left(
+1-\frac{t^2}{k_1^2} 
+\right) \quad \quad \forall t\geq 0$$
+\item[(2)] Moments (bounds on $L^p$ norm):
+\begin{equation*}
+(\E|X|^p)^{\frac{1}{p}} \leq k_2 \sqrt{p} \quad \quad \forall p \geq 1
+\end{equation*}
+\item[(3)] Super-exponential moments:
+\begin{equation*}
+\E\left[\exp
+\left(
+\frac{X^2}{k_3^2}
+\right)
+\right] \leq e
+\end{equation*}
+\end{enumerate}
+Moreover, if $\E X=0$, then properties 1-3 are also equivalent to the following one:
+\begin{enumerate}
+\item[(4)] Moment generating function:
+\begin{equation*}
+\E [\exp(tX)] \leq \exp(t^2k_4^2)\quad \quad \forall t \in \R
+\end{equation*}
+\end{enumerate}
+\end{mdframed}
+\begin{proof}
+First note that all properties are \emph{homogeneous}, i.e., $X$ satisfies the property with $k_i$ iff $\widetilde{X} = \frac{X}{k_i}$ satisfies the properties with $\widetilde{k_i} =1$. For example for property
+\begin{equation*}
+P(|X|>t) \leq \exp\left(
+1-\frac{t^2}{k_1^2}
+\right) \quad \quad \forall t\geq 0
+\end{equation*}
+is equivalent to
+\begin{equation*}
+P(|\widetilde{X}| > \widetilde{t}) = P(|X| > \widetilde{t}\cdot k_1) \leq \exp\left(1-\widetilde{t}^2\right).
+\end{equation*}
+So we can also always assume $k_i=1$ and show $k_j \leq C$. \vspace{-0.5pc}
+\begin{itemize}
+\item \underline{$1\implies 2$:} Assume property 1. Note that 
+\begin{equation*}
+\begin{split}
+\E|X|^p = \ & \E \left(
+\int_0^\infty \mathbbm{1}_{\{y<|X|^p\}}dy
+\right) \\
+\overset{\text{Fubini}}= &
+\int_0^\infty \E [\mathbbm{1}_{\{\|X\|^p >y\}}]dy \\
+=\ & \int_0^\infty P(|X|^p \geq y)dy \\
+\overset{y=t^p}= & \int_0^\infty P(|X|>t)pt^{p-1}dt \\
+\overset{\text{prop 1}}\leq &
+\int_0^\infty \exp(1-t^2) p t^{p-1}dt \\
+= \ & \left(
+\frac{ep}{2}
+\right) \Gamma\left(\frac{p}{2}\right) \leq \left(
+\frac{ep}{2}
+\right) \left(
+\frac{p}{2}
+\right)^{\frac{p}{2}}
+\end{split}
+\end{equation*}
+So property 1 with $k_1=1$  implies property 2 with $k_2 = \sup_p \frac{1}{\sqrt{2}} \left(\frac{ep}{2}
+\right)^{\frac{1}{p}} $.
+\mymarginpar{\tiny{5. Lecture \\ 14.11.2022}}
+\item \underline{$2\implies 3$:} Let $c>0$ and assume $k_2=1$. Writing the Taylor series of the exponential function
+\begin{equation*}\label{eq:sub-exp-moment-est}
+\begin{split}
+\E[\exp(cX^2)] =\  & 1+\sum_{p=1}^\infty \frac{c^p\E[X^{2p}]}{p!} 
+\overset{\text{prop 2}}\leq  1 + \sum_{p=1}^\infty c^p \frac{(2p)^{\frac{1}{2}\cdot 2p}}{p!} \\
+\overset{p!\geq \left( \frac{p}{e} \right)^p}\leq & 
+1+ \sum_{p=1}^\infty c^p \frac{(2p)^p}{\left(\frac{p}{e}\right)^p} 
+= \  1 + \sum_{p=1}^\infty (2ce)^p	\\
+\overset{\text{if }2ce<1}= & \frac{1}{1-2ce}  = \frac{e}{e(1-2ce)} \overset{\text{if } 1-2ce \geq \frac{1}{e}} \leq e 
+\end{split}
+\end{equation*}
+This estimation holds if $1-2ce \geq \frac{1}{e}$, i.e. $c\leq \frac{e-1}{2e^2}$. Under this assumption, we have
+\begin{equation*}
+\E\exp\left(
+\frac{e-1}{2e^2}X^2
+\right) \leq e.
+\end{equation*}
+Because the choice of $c$ was arbitrary, property 3 holds with $k_3 = \sqrt{\frac{2e^2}{e-1}}$.
+\item \underline{$3\implies 1$:}  Note that
+\begin{equation*}
+\begin{split}
+P(|X|>t) =\  & P(\exp(X^2)\geq \exp(t^2)) \\
+\overset{\text{Mkv}}\leq & \exp(-t^2) \E[\exp(X^2)].
+\end{split}
+\end{equation*}
+So property 3 with $k_3=1$ implies property 1 with $k_1$ with $k_1=1$.
+\item \underline{$2\implies 4$:} Taylor series imply
+\begin{equation}\label{eq:subgaussian-moment-gen-est}
+\begin{split}
+\E[\exp(tX)] =\  & 1+ t \underbrace{\E[X]}_{=0 \text{ by ass.}} + \sum_{p=2}^\infty \frac{t^p \E[X^p]}{p!}\\
+\overset{\text{prop 2}}\leq & 1 + \sum_{p=2}^\infty \frac{t^p p^{\frac{p}{2}}}{p!} \\
+\overset{p!\geq (\frac{p}{e})^p}\leq & 1+ \sum_{p=2}^\infty \left(
+\frac{et}{\sqrt{p}}
+\right)^p
+\end{split}
+\end{equation}
+We need to compare \eqref{eq:subgaussian-moment-gen-est} with
+\begin{equation}\label{eq:subgaussian-moment-gen-est-2}
+\exp(k_4^2t^2) = 1 + \sum_{k=1}^\infty \frac{(k_4|t|)^{2k}}{k!} \overset{p!\leq p^p}{\geq} \sum_{k=1}^\infty \left( 
+\frac{k_4|t|}{\sqrt{k}}
+\right)^{2k}
+\end{equation}
+Note that there are no odd terms in \eqref{eq:subgaussian-moment-gen-est-2}. Thus, we need to control $\left(\frac{et}{\sqrt{p}}\right)^p, p\geq 3$ and odd. If $\frac{e|t|}{\sqrt{p}} \leq 1$, then
+\begin{equation*}
+\left(\frac{e|t|}{\sqrt{p}} \right)^p \leq \left(\frac{e|t|}{\sqrt{p}} \right)^{p-1} \leq \left(\frac{e|t|}{\sqrt{p-1}} \right)^{p-1}.
+\end{equation*}
+ If $\frac{e|t|}{\sqrt{p}} > 1$, then
+ \begin{equation*}
+ \left(\frac{e|t|}{\sqrt{p}} \right)^p \leq \left(\frac{e|t|}{\sqrt{p}} \right)^{p+1} \leq  \left(\frac{e|t|}{\sqrt{\frac{p+1}{2}}} \right)^{p+1} = \left(\frac{\sqrt{2}e|t|}{\sqrt{p+1}}
+ \right)^{p+1}.
+ \end{equation*}
+ Therefore,
+ \begin{equation}\label{eq:subgaussian:equiv:odd:help}
+ \left(\frac{e|t|}{\sqrt{p}} \right)^p \leq \left(\frac{e|t|}{\sqrt{p-1}} \right)^{p-1}+ \left(\frac{\sqrt{2}e|t|}{\sqrt{p+1}}
+ \right)^{p+1}
+ \end{equation}
+ Hence,
+ \begin{equation*}
+ \begin{split}
+ \E[\exp(tX)] \overset{\eqref{eq:subgaussian-moment-gen-est}}{\leq} & 1+ \sum_{p=2}^\infty \left(
+\frac{et}{\sqrt{p}}
+\right)^p	\\
+\leq \ &	1+
+\sum_{p\in 2\mathbb{N}}\left(
+\frac{e|t|}{\sqrt{p}}
+\right)^p + \left(
+\frac{e|t|}{\sqrt{p+1}}
+\right)^{p+1} \\
+\overset{\eqref{eq:subgaussian:equiv:odd:help}}{\leq} & 1+ \sum_{p\in2\mathbb{N}}  \left(
+\frac{e|t|}{\sqrt{p}}
+\right)^p +  \left(
+\frac{e|t|}{\sqrt{p}}
+\right)^p  + \left(
+\frac{\sqrt{2}e|t|}{\sqrt{p+2}}
+\right)^{p+2}	\\
+\leq \ & 1 + \sum_{p\in 2\mathbb{N}} \underbrace{\left(2+(\sqrt{2})^p\right)}_{\leq (2\sqrt{2})^p}  \left(
+\frac{e|t|}{\sqrt{p}}
+\right)^p \\
+\overset{p=2k}\leq  &	1+\sum_{k\in \mathbb{N}}\left(
+\frac{2\sqrt{2}e|t|}{\sqrt{2k}}
+\right)^{2k} 
+\\
+\overset{\eqref{eq:subgaussian-moment-gen-est-2}}\leq & \exp(k_4^2t^2)
+\end{split}
+ \end{equation*}
+ provided $k_4 \geq 2e$.
+ \item \underline{$4\implies 1$:} Note that Markov implies $\forall \lambda>0$
+ \begin{equation*}
+ \begin{split}
+ P(X\geq t) = P (\exp(\lambda X) \geq \exp(\lambda t)) \leq  \exp(-\lambda t) \E[\exp(\lambda X)]
+ \end{split} \overset{\text{prop 4}}\leq \exp(-\lambda t+\lambda^2)
+ \end{equation*}
+ with $k_4=1$. By choosing $\lambda = \frac{t}{2}$ we get
+ $$P(X\geq t) \leq \exp\left(
+-\frac{t^2}{4} 
+ \right).$$
+ and therefore $$
+P(|X|\geq t)\leq 2 \exp\left(
+-\frac{t^2}{4}
+\right) \leq \exp\left(1-\frac{t^2}{4}\right).
+$$
+\end{itemize}
+This completes the proof.
+\end{proof}
+\begin{remark*}Note that \vspace{-0.5pc}
+\begin{enumerate}
+\item Constants 1 and $e$ in property 1 and 3 are chosen for convenience, any number $>0$ or $>1$, respectively, will do.
+\item $4\implies 1$ does not use $\E X=0$ and thus the condition is only for necessity.
+\end{enumerate}
+\end{remark*}
+\end{lemma}
+\vspace{-2.85pc}
+\begin{definition}[Subgaussian random variables]
+\begin{mdframed}
+A random variable that satisfies one of the equivalent properties 1-3 in Lemma \ref{lemma:subgaussian} is called a subgaussian random variable. The \textbf{subgaussian norm} of $X$, denoted as $\|X\|_{\psi_2}$, is defined as the smallest $k_2$ in property 2. In other words\vspace{-0.5pc}
+\begin{equation*}
+\|X\|_{\psi_2} = \sup_{p\geq 1} p^{-\frac{1}{2}}(\E[|X|^p])^\frac{1}{p} \vspace{-0.1pc}
+\end{equation*}
+\end{mdframed}
+\newpage
+\begin{remark*}
+The subgaussian norm is indeed a norm: %\vspace{-0.5pc}
+\begin{enumerate}[itemsep = 0pc]
+\item $\|X\|_{\psi_2} = 0 \iff X=0 \quad \text{a.s.}$\\
+``$\Leftarrow$'' direct calculation \\
+``$\Rightarrow$'' If not $X=0$ a.s., then $\exists \varepsilon>0$ s.t. $P(|X|>\varepsilon)=p>0$. Thus $$\|X\|_{\psi_2} \overset{p=1}\geq \E[|X|] \geq \varepsilon P(|X|\geq \varepsilon) = p-\varepsilon>0, $$
+which is a contradiction.
+\item $\|\lambda X\|_{\psi_2} = \sup_{p\geq 1} p^{-\frac{1}{2}}(\E|\lambda X|^p)^{\frac{1}{p}} = |\lambda| \|X\|_{\psi_2}$.
+\item Triangle inequality:
+\begin{equation*}
+\begin{split}
+\|X+Y\|_{\psi_2} = & \sup_{p\geq 1} p^{-\frac{1}{2}}(\E[|X+Y|^p])^{\frac{1}{p}} \\
+\underset{\text{for }L^p}{\overset{\text{Minkovski}}\leq} & \sup_{p\geq 1} p^{-\frac{1}{2}} \left( (\E[|X|^p])^{\frac{1}{p}}+(\E[|Y|^p])^{\frac{1}{p}} \right) \\
+\leq \ & \sup_{p\geq 1}  p^{-\frac{1}{2}}  (\E[|X|^p])^{\frac{1}{p}}+ \sup_{p\geq 1}  p^{-\frac{1}{2}}(\E[|Y|^p])^{\frac{1}{p}}  \\
+= \ & \|X\|_{\psi_2} + \|Y\|_{\psi_2}
+\end{split}
+\end{equation*}
+\end{enumerate}
+Thus, the class of subgaussian random variables on a given probability space is thus a normed space.\\\\
+We can now reformulate Lemma \ref{lemma:subgaussian} into the language of subgaussian norm. By Lemma  \ref{lemma:subgaussian} , there exist universal constants $c,C$ s.t. a subgaussian random variable satisfies
+%\begin{equation*}
+\begin{align}
+P(|X|>t) \leq \exp \left(
+1-\frac{ct^2}{\|X\|_{\psi_2}^2}
+\right)& \quad \quad \forall t>0,	\\ \label{eq:subgaussian-alter-2}
+\left(\E[|X|^p]\right)^{\frac{1}{p}} \leq \|X\|_{\psi_2} \sqrt{p}& \quad \quad \forall p \geq 1,\\
+\E\left[
+\frac{cX^2}{\|X\|_{\psi_2}^2} 
+\right] \leq e	&, \\
+\E[\exp(tX)] \leq \exp \left(
+Ct^2 \|X\|_{\psi_2}^2
+\right) & \quad \quad \forall t\in \R \text{ if } \E[X]=0.
+\end{align}
+%\end{equation*}
+Moreover, up to absolute constant factors, $\|X\|_{\psi_2}$ is the smallest possible number in the properties of Lemma \ref{lemma:subgaussian}.
+\end{remark*}\vspace{-1.5pc}
+\end{definition} 
+\begin{example*}Examples for subgaussian random variables. \vspace{-0.5pc}
+\begin{enumerate}
+\item (Gaussian) If $X$ is a centered standard normal random variable with variance $\sigma^2$, then $X$ is subgaussian with $\|X\|_{\psi_2} \leq C\cdot \sigma$. 
+\item (Bounded RV) Let $X$ be such that $|X|\leq M$ a.s. Then $X$ is subgaussian with $\|X\|_{\psi_2} \leq M$. Indeed, $(\E[|X|^p])^{\frac{1}{p}} \leq M \leq \sqrt{p} M$. In particular, a \underline{Rademacher} random variable $P(\varepsilon =1) = P(\varepsilon = -1) =\frac{1}{2}$ satisfies
+$$
+\|\varepsilon\|_{\psi_2} = 1.
+$$
+(We have equality for $p=1$).
+\end{enumerate}
+\end{example*}
+Last time we have seen that normal distribution is well-behaved. One more nice property for Gaussian is \underline{rotation invariance}, which makes it easy to work in high dimensions. Given a finite number of independent centered normal random variables $X_i$,  their sum $\sum_i X_i$ is also a centered random variable with $\Var\left(\sum_i X_i\right) = \sum_i \Var(X_i)$. \underline{Idea:} multiplicativity of moment generating function same works for subgaussians.
+
+\begin{lemma}[Rotation invariance]
+\begin{mdframed}
+Consider a finite number of independent centered subgaussian random variables $X_i$. Then $\sum_i X_i$ is also a centered subgaussian random variable. Moreover,
+\begin{equation*}
+\left\|
+\sum_i X_i
+\right\|^2_{\psi_2} \leq C\sum_i\|X_i\|_{\psi_2}^2,
+\end{equation*}
+where $C$ is an absolute constant.
+\end{mdframed}
+\begin{proof}
+One of the equivalent properties if $\E X=0$ is:
+\begin{equation*}
+\E [\exp(tX)] \leq \exp \left( 
+Ct^2 \|X\|_{\psi_2}^2\right)	\quad\quad \forall t\in\R.
+\end{equation*}
+So for $t\in \R$
+\begin{equation*}
+\begin{split}
+\E \left[\exp\left(
+\sum_i X_i
+\right) \right] = \E \left[
+\prod_i \exp(tX_i)
+\right]
+\overset{\text{indep.}}{=}
+\prod_i \exp(tX_i)	\\
+\leq \prod_i \exp(Ct^2 \|X_i\|_{\psi_2}^2) = \exp(t^2K^2)
+\end{split}
+\end{equation*}
+where $K^2 = C\sum_i\|X_i\|_{\psi_2}^2$. Then, by Lemma \ref{lemma:subgaussian} (4 $\Rightarrow$ 2), we have
+$$\left\|
+\sum_i X_i
+\right\|_{\psi_2}\leq C_1 K=C_1C\sum_i \|X_i\|_{\psi_2}^2,$$
+where $C_1$ is an absolute constant.
+\end{proof}
+\end{lemma}
+\mymarginpar{\tiny{6. Lecture \\ 21.11.2022}}
+A direct consequence of rotation invariance is Hoeffdings-type inequality for sums of independent subgaussian random variables.
+\begin{prop}[Hoeffding-type inequality for sub-gaussian] \label{prop:hoeffding-subg}
+\begin{mdframed}
+Let $X_1,...X_N$ be independent centered sub-gaussian random variables. Let $$K = \max_i \|X_i\|_{\psi_2}.$$ Then for every $a=(a_1,...,a_N)\in \R^N$ and $t>0$, we have
+\begin{equation*}
+P\left(
+\left|
+\sum_{i=1}^N a_iX_i
+\right| > t
+\right) \leq e \cdot \exp \left(
+- \frac{ct^2}{K^2 \|a\|_2^2}
+\right)
+\end{equation*}
+where $c>0$ is an absolute constant.
+\end{mdframed}
+\begin{proof} First note that linear combinations of subgaussian random variables are again subgaussian:
+\begin{equation*}
+\left\| \sum_i a_iX_i\right\|_{\psi_2}^2 \overset{\text{rotation inv}}{\leq} C\sum_i \|a_iX_i\|^2_{\psi_2} \leq CK^2\|a\|_2^2.
+\end{equation*}
+The tail decay follows from Lemma \ref{lemma:subgaussian}.% (2) $\Rightarrow$ (1).
+\end{proof}
+\end{prop}
+The same works for moments instead of tails.
+\begin{corollary}[Khintchine-type inequality] 
+\begin{mdframed} 
+Let $X_1,...X_N$ be independent centered subgaussian random variables. Then for $p\geq 2$ and any sequence of coefficients $a\in\R^N$
+\begin{equation}\label{cor:Khintchine}
+\left(\E\left|\sum_i a_iX_i\right|^p\right)^{\frac{1}{p}} \leq C \cdot \sqrt{p} \cdot \|a\|_2,
+\end{equation}
+where $C$ is an absolute constant. Furthermore, if the $X_i$'s also have unit variance, then
+\begin{equation}\label{cor:Khintchine2}
+\left(
+\E \left| \sum_i a_iX_i \right|^p
+\right)^\frac{1}{p} \geq \|a\|_2.
+\end{equation}
+\end{mdframed}
+\begin{proof}
+The inequality \eqref{cor:Khintchine} follows directly from Lemma \ref{lemma:subgaussian} by using a similar argument as in Proposition \ref{prop:hoeffding-subg}. For the inequality \eqref{cor:Khintchine2}, we estimate
+\begin{equation*}
+\begin{split}
+\left(
+\E \left| \sum_i a_i X_i \right|^p
+\right)^{\frac{1}{p}} = \  & \left(
+\E \left| \sum_i a_i X_i \right|^{\frac{p}{2}\cdot 2}
+\right)^{\frac{1}{p}} \\
+\underset{x\mapsto x^{\frac{p}{2}}}{\overset{\text{Jensen}}{\geq}}   & \left(\E \left| \sum_i a_iX_i\right|^2\right)^{\frac{p}{2}\cdot \frac{1}{p}} \\
+=  & \left(\E \left[ \sum_{i,j} a_ia_jX_iX_j\right]\right)^{\frac{1}{2}} \\
+\overset{\text{indep.}}{=}\ & \Bigg(\E\left[\sum_i a_i^2 X_i^2\right] + \underbrace{\sum_{i\neq j} a_ia_j \E[X_i]\E[X_j]}_{=0}	\Bigg)^{\frac{1}{2}} \\
+= \ & \Bigg( \sum_i a_i^2 \underbrace{\E X_i^2}_{=1} \Bigg)^\frac{1}{2} = \|a\|_2
+\end{split}
+\end{equation*}
+and hereby the claim.
+\end{proof}
+\end{corollary}
+\subsection{Subexponential random variables}
+What if variables are not subgaussian? We talk about heavy-tailed random variables. In homework, we will see similar equivalence between tails, moments and super-exponential moments for any tail decay with rate $\exp(t^\alpha)$ with $\alpha \geq 1$. The ``heaviest'' tail in this framework would be $\alpha =1 $. Similar to the normal distribution as a prototype distribution for subgaussian, a prototype distribution for this case is the exponential distribution given by
+\begin{equation*}
+P(X\geq t) = e^{-t},\quad \quad t \geq 0.
+\end{equation*}
+\begin{lemma}\label{lem:subexp}
+\begin{mdframed}
+Let $X$ be a random variable. Then the following properties are equivalent with parameters $K_i>0$ differing from each other by at most an absolute constant factor: \vspace{-0.5pc}
+\begin{enumerate}
+\item[(1)] Tails:
+\begin{equation*}
+P(|X|>t) \leq \exp \left(1-\frac{t}{K_1}	\right)	\quad\quad \forall t\geq 0
+\end{equation*}
+\item[(2)] Moments:
+\begin{equation*}
+\left(
+\E|X|^p
+\right)^\frac{1}{p} \leq K_2 \cdot p \quad \quad \forall p \geq 1
+\end{equation*}
+\item[(3)] Exponential moments:
+\begin{equation*}
+\E\left[\exp\left(
+\frac{X}{K_3}
+\right)\right] \leq e
+\end{equation*}
+\end{enumerate}
+\end{mdframed}
+\begin{proof}
+Special case of Exercise.
+\end{proof}
+\end{lemma}
+\begin{definition}[Sub-exponential random variables]
+\begin{mdframed}
+A random variable $X$ that satisfies one of the properties in Lemma \ref{lem:subexp} is called a \textbf{sub-exponential} random variable. The \textbf{sub-exponential} norm of $X$, denoted by $\|X\|_{\psi_1}$, is defined to be the smallest parameter $K_2$, i.e.
+\begin{equation*}
+\|X\|_{\psi_1} = \sup_{p\geq 1} p^{-1} (\E[|X|^p])^{\frac{1}{p}}.
+\end{equation*}
+\end{mdframed}
+\end{definition}
+What are the relations between subgaussian and subexponential random variables?
+\begin{lemma}[Sub-exponential is sub-gaussian squared]
+\begin{mdframed}
+A random variable $X$ is subgaussian if and only if $X^2$ is sub exponential. Moreover,
+\begin{equation*}
+\|X\|_{\psi_2}^2 \leq \|X^2\|_{\psi_1} \leq 2 \cdot \|X\|^2_{\psi_2}.
+\end{equation*}
+\end{mdframed}
+\begin{proof}
+First note that 
+\begin{equation*}
+\|X\|^2_{\psi_2} = \left(
+\sup_{p\geq 1} p^{-\frac{1}{2}} (\E[|X|^p])^\frac{1}{p} \right)^2= \sup_{p\geq 1} p^{-1} (\E[|X|^p])^\frac{2}{p}.
+\end{equation*}
+On one hand,
+\begin{equation*}
+\begin{split}
+\sup_{p\geq 1} p^{-1} (\E[|X|^p])^\frac{2}{p} = \ &\frac{1}{2} \sup_{p\geq 1} \left(\frac{p}{2}\right)^{-1} (\E[|X^2|^\frac{p}{2}])^\frac{2}{p} \\
+\overset{q:=\frac{1}{2}p}{=} \ &\frac{1}{2} \sup_{q\geq \frac{1}{2}} q^{-1} (\E[|X^2|^q])^\frac{1}{q} \\
+\leq \ &\frac{1}{2} \sup_{q\geq 1} q^{-1} (\E[|X^2|^q])^\frac{1}{q} = \frac{1}{2}\|X^2\|_{\psi_1},
+\end{split}
+\end{equation*}
+and thus $$\|X^2\|_{\psi_1} \leq 2 \cdot \|X\|^2_{\psi_2}.$$
+On the other hand,
+\begin{equation*}
+\begin{split}
+\sup_{p\geq 1} p^{-1} (\E[|X|^p])^\frac{2}{p} \overset{\text{Jensen}}\leq \sup_{p\geq 1} p^{-1} (\E[|X^2|^p])^\frac{1}{p} = \|X^2\|_{\psi_1},
+\end{split}
+\end{equation*}
+thereby establishing the claim.
+\end{proof}
+\end{lemma}
+Recall that there are four equivalent defining properties of a \emph{centered} subgaussian random variable, but only three of a subexponential. The moment generating function property is missing. \vspace{0.5pc}\\ \underline{Problem:} Even for the prototype exponential distribution, the moment generating function is not finite for $t \geq 1$. We thus need a ``local'' version.
+\begin{lemma}[Moment generating function of subexponential random variables] \label{lem:moment-gen-subexp}
+\begin{mdframed}
+Let $X$ be a centered sub-exponential random variable. Then the following holds
+\begin{equation*}
+\E[\exp(tX)] \leq \exp(Ct^2 \|X\|^2_{\psi_1})\quad\quad \forall |t| \leq \frac{c}{\|X\|_{\psi_1}}
+\end{equation*}
+with absolute constants $c,C'$.
+\end{mdframed}
+\begin{proof}
+As in the subgaussian case, w.l.o.g. we assume $\|X\|_{\psi_1} = 1$. Taylor expansion for centered variables implies
+\begin{equation*}
+\begin{split}
+\E[\exp(tX)] = \ & 1 + \underbrace{\E(tX)}_{=0} + \sum_{p=2}^\infty \frac{|t|^p \E[|X|^p]}{p!} \\
+\overset{X \text{ subexp}}\leq  & 1+ \sum_{p=2}^\infty \frac{|t|^p p^p}{p!} \\
+\overset{p! \geq \frac{p^p}{e^p}}{\leq} & 1 + \sum_{p=2}^\infty |t|^pe^p \\
+= \ & 1+e^2t^2\sum_{p=0}^\infty |t|^p e^p \\
+\overset{\text{if } e|t|<1}{=}  & 1+ e^2t^2 \cdot \frac{1}{1- e|t|}	\\
+\overset{\text{if } e|t|\leq \frac{1}{2}}{\leq} & 1+2e^2t^2 \leq \exp(2e^2t^2)
+\end{split}
+\end{equation*} 
+thereby the claim.
+\end{proof}
+\end{lemma}
+By the central limit theorem, a sum of independent subexponential variables will be sub-gaussian in the limit. For non-asymptotic regime, we have a combination of subgaussian (from the limit behaviour) and subexponential (behaviour of variables)
+\begin{prop}[Bernstein-type inequality]
+\begin{mdframed}
+Let $X_1,...,X_N$ be independent centered sub-exponential random variables and let $K= \max_i \|X\|_{\psi_1}$. Then for any $a=(a_1,...,a_N)\in \R^N$ it holds
+\begin{equation*}
+P\left(
+\left| \sum_{i=1}^N a_i X_i
+\right| \geq t \right) \leq 2 \exp \left(
+-c \min \left\{
+\frac{t^2}{K^2 \|a\|_2^2}, \frac{t}{K\|a\|_\infty}
+\right\}
+\right) \quad 
+\forall t \geq 0
+\end{equation*}
+where $c>0$ is an absolute constant.
+\end{mdframed}
+\begin{proof}
+Using homogenity, we assume $K=1$ and set $S:=\sum_i a_iX_i$. We have
+\begin{equation*}
+\begin{split}
+P(S>t) = & P(\exp(\lambda S) > \exp (\lambda t)) \\
+\overset{\text{Mkv}}\leq & \exp(-\lambda t) \E [\exp(\lambda S)]	\\
+\overset{\text{indep}}= & \exp(-\lambda t) \prod_i \E[\exp(\lambda a_i X_i)]\quad \forall \lambda>0.
+\end{split}
+\end{equation*}
+We want to use Lemma \ref{lem:moment-gen-subexp} which requires $|\lambda a_i| \leq c$ (we assumed $K=1$). Thus, we choose 
+$\lambda\leq \frac{c}{\|a\|_\infty}$.  We have then
+\begin{equation*}
+\begin{split}
+P(S\geq t) \overset{\text{Lem \ref{lem:moment-gen-subexp}}}{\leq} & \exp(-\lambda t) \prod_i  \exp(C\lambda^2a_i^2) \\
+= \ & \exp\left(
+-\lambda t + C \lambda^2 \|a\|_2^2
+\right)\quad \quad	\forall \lambda\leq\frac{c}{\|a\|_\infty}
+\end{split}
+\end{equation*}
+To control the $\exp$ here, we need $$
+\lambda \leq \frac{t}{2C\|a\|_2^2}.
+$$
+Hence, we choose
+$$\lambda = \min\left\{
+\frac{t}{2C\|a\|_2^2} , \frac{c}{\|a\|_\infty}
+\right\}.$$
+Then, we have
+\begin{equation*}
+P(S>t) \leq \exp\left( -\frac{\lambda}{2}t  \right) = \exp\left(-\min\left\{
+\frac{t^2}{4C\|a\|_2^2} , \frac{ct}{2\|a\|_\infty}
+\right\}\right)
+\end{equation*}
+Similarity, we can show
+$$P(-S>t) \leq \exp\left(-\min\left\{
+\frac{t^2}{4C\|a\|_2^2} , \frac{ct}{2\|a\|_\infty}
+\right\}\right).$$
+Consequently,
+$$P(|S|>t) \leq 2\exp\left(-\min\left\{
+\frac{t^2}{4C\|a\|_2^2} , \frac{ct}{2\|a\|_\infty}
+\right\}\right)$$
+and hereby the claim.
+\end{proof}
+\end{prop}
+\end{document}

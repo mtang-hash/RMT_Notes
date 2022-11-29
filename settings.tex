@@ -1,0 +1,238 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% \usepackage{lmodern}
+\usepackage{lmodern}
+\usepackage[left=28mm,top=28mm,right=28mm,bottom=28mm] {geometry}
+\usepackage{amsfonts}
+
+\usepackage{mathrsfs}
+\usepackage[intlimits]{amsmath}
+\usepackage{mathtools}
+
+\usepackage{mathabx}
+\usepackage{bbm}
+\usepackage{stmaryrd}
+\usepackage{relsize}
+\usepackage{etoolbox}
+\usepackage{lscape}
+\usepackage{afterpage}
+\usepackage{makecell}
+\usepackage[shortlabels]{enumitem}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{cancel}
+\usepackage{mdframed}
+\usepackage{framed}{}
+\usepackage{tablefootnote} 
+\usepackage{listings}
+\usepackage{amsthm}
+%\usepackage[dvipsnames]{xcolor}
+\usepackage[x11names,dvipsnames]{xcolor}
+\colorlet{myGray}{gray!3!white}
+\usepackage{etoolbox}
+\usepackage[all]{xy}
+\usepackage{tikz}
+%\usepackage{subfigure}
+%\usepackage{bbold}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{fadings}
+\usepackage{thmtools}
+\usepackage{stmaryrd}
+\usepackage[ruled,vlined]{algorithm2e}
+%\usepackage{stix}
+%\let\Hermaphrodite\relax
+\usepackage[font=small]{caption}
+\usepackage{subcaption}
+\usepackage[final]{pdfpages}
+\usepackage{hhline}
+\let\Sun\relax
+\let\Moon\relax
+\let\Mercury\relax
+\let\Venus\relax
+\let\Earth\relax
+\let\Mars\relax
+\let\Jupiter\relax
+\let\Saturn\relax
+\let\Uranus\relax
+\let\Neptune\relax
+\let\Pluto\relax
+\let\Gemini\relax
+\let\Leo\relax
+\let\Libra\relax
+\let\Scorpio\relax
+\let\Aries\relax
+\let\Taurus\relax
+\usepackage{marvosym}
+\usepackage[
+   pdfpagelabels=true,
+   pdftitle={Probabilistic Techniques and Algorithms in Data Analysis},
+   pdfauthor={Min Tang},
+   hidelinks
+ ]{hyperref}
+\usepackage{esint}
+\usepackage{bookmark}
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\usepackage{listings}
+\usepackage[style=numeric,sorting=none,backend=bibtex]{biblatex}
+\usepackage{dsfont}
+\addbibresource{literature.bib}
+\lstset{
+  frame=none,
+  xleftmargin=0pt,
+  %stepnumber=1,
+  %numbers=left,
+  %numbersep=5pt,
+  backgroundcolor = \color{myGray},
+  numberstyle=\ttfamily\tiny\color[gray]{0.3},
+  belowcaptionskip=\bigskipamount,
+  captionpos=b,
+  escapeinside={*'}{'*},
+  language=haskell,
+  tabsize=2,
+  emphstyle={\bf},
+  commentstyle=\it,
+  stringstyle=\mdseries\rmfamily,
+  showspaces=false,
+  keywordstyle=\bfseries\rmfamily,
+  columns=flexible,
+  basicstyle=\small\sffamily,
+  showstringspaces=false,
+  morecomment=[l]\%,
+}
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
+
+\usetikzlibrary{cd}
+\usetikzlibrary{calc}
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;} 
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{problem}[definition]{Problem}
+%\theoremstyle{theorem}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem*{theorem*}{Theorem}
+\newtheorem{prop}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{example}[definition]{Example}
+\newtheorem*{example*}{Example}
+\theoremstyle{definition}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem*{remark*}{Remark}
+\AfterEndEnvironment{lemma}{\noindent\ignorespaces}
+\AfterEndEnvironment{definition}{\noindent\ignorespaces}
+\AfterEndEnvironment{example}{\noindent\ignorespaces}
+\AfterEndEnvironment{theorem}{\noindent\ignorespaces}
+
+\AfterEndEnvironment{prop}{\noindent\ignorespaces}
+% \AfterEndEnvironment{satz}{\noindent\ignorespaces}
+% \AfterEndEnvironment{korollar}{\noindent\ignorespaces}
+\AfterEndEnvironment{remark}{\noindent\ignorespaces}
+\AfterEndEnvironment{paragraph}{\noindent\ignorespaces}
+
+\AfterEndEnvironment{remark*}{\noindent\ignorespaces}
+\AfterEndEnvironment{example*}{\noindent\ignorespaces}
+
+% \AfterEndEnvironment{remark'}{\noindent\ignorespaces}
+% \AfterEndEnvironment{proposition}{\noindent\ignorespaces}
+% \AfterEndEnvironment{proof}{\noindent\ignorespaces}
+\let\existstemp\exists
+\let\foralltemp\forall
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node (#1) {};}
+\newcommand{\vsubset}{\rotatebox[origin=c]{90}{$\subset$}}
+\newcommand{\vphi}{\phi}
+\newcommand{\ol}{\overline}
+%Differentiation
+\newcommand{\D}{\, \mathrm{d} }
+%Bold Symbols
+\newcommand{\E}{\mathbb{E}}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+%Calligraphic Symbols
+\newcommand{\ZZ}{\mathcal{Z}}
+\newcommand{\II}{\mathcal{I}}
+\newcommand{\FF}{\mathcal{F}}
+\newcommand{\QQ}{\mathcal{Q}}
+\newcommand{\EE}{\mathcal{E}}
+\newcommand{\PP}{\mathcal{P}}
+\newcommand{\TT}{\mathcal{T}}
+\newcommand{\MM}{\mathcal{M}}
+\newcommand{\HH}{\mathscr{H}}
+\newcommand{\RR}{\mathscr{R}}
+\newcommand{\BB}{\mathscr{B}}
+\newcommand{\CC}{\mathscr{C}}
+\newcommand{\DD}{\mathscr{D}}
+\newcommand{\LL}{\mathscr{L}}
+\newcommand{\NN}{\mathscr{N}}
+\renewcommand{\AA}{\mathscr{A}}
+% Operator names
+\newcommand{\id}{\operatorname{id}}
+\newcommand{\Hom}{\operatorname{Hom}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\del}{\partial}
+\newcommand{\GL}{\operatorname{GL}}
+\newcommand{\vol}{\operatorname{vol}}
+\newcommand{\Var}{\operatorname{Var}} 
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\End}{\operatorname{End}}
+\newcommand{\SL}{\operatorname{SL}}
+\newcommand{\Aff}{\operatorname{Aff}}
+\newcommand{\Isom}{\operatorname{Isom}}
+\newcommand{\Trans}{\operatorname{Trans}}
+\newcommand{\Bild}{\begin{tiny}(Bild hier)\end{tiny}}
+\newcommand{\Ueb}{\begin{tiny}\textbf{(Ü)}\end{tiny}}
+\newcommand{\te}{\text}
+\newcommand{\comment}[1]{}
+\newcommand{\drawaline}{\rule{\textwidth}{0.2pt}}
+%\renewcommand{\def}{\definition}
+%\renewcommand{\var}{\operatorname{var}}
+\renewcommand{\ker}{\operatorname{ker}}
+\renewcommand*{\forall}{\foralltemp\mkern2mu}
+\renewcommand{\emptyset}{\varnothing}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\O}{\operatorname{O}}
+\renewcommand{\Im}{\operatorname{im}}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+\renewcommand{\phi}{\varphi}
+\makeatletter 
+\AfterEndEnvironment{mdframed}{%
+ \tfn@tablefootnoteprintout% 
+ \gdef\tfn@fnt{0}% 
+}
+\numberwithin{equation}{section}
+\numberwithin{definition}{section}
+\numberwithin{theorem}{section}
+\numberwithin{example}{section}
+\numberwithin{lemma}{section}
+\numberwithin{prop}{section}
+\numberwithin{corollary}{section}
+\numberwithin{problem}{section}
+\numberwithin{remark}{section}
+\usepackage{xpatch}
+
+% \makeatletter
+% \AtBeginDocument{\xpatchcmd{\@thm}{\thm@headpunct{.}}{\thm@headpunct{}}{}{}}
+% \makeatother
+\newcommand{\attvis}[2]{\definecolor{att}{rgb}{1, #2, #2} \colorbox{att}{#1}}
+
+
+\setlist[enumerate,1]{label={(\roman*)}}
+\DeclareUnicodeCharacter{2212}{-}
+\DeclareRobustCommand{\mymarginpar}[1]{%
+ \marginpar[\raggedleft#1]{\raggedright#1}}
+\pagestyle{headings}
+% \linespread{1.1}
